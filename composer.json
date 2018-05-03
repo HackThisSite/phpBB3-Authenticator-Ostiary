@@ -1,0 +1,28 @@
+{
+    "name": "hackthissite/ostiary",
+    "type": "phpbb-extension",
+    "description": "HackThisSite.org phpBB authentication extension",
+    "homepage": "https://github.com/HackThisSite/phpBB3-Authenticator-Ostiary",
+    "version": "0.1.0",
+    "time": "2018-05-02",
+    "keywords": ["phpbb", "extension", "hackthissite", "auth", "SSO"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "weekend",
+            "email": "weekend@hackthissite.org",
+            "homepage": "https://github.com/wknd/",
+            "role": "Lead Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "composer/installers": "~1.0"
+    },
+    "extra": {
+        "display-name": "HackThisSite Auth Extension",
+        "soft-require": {
+            "phpbb/phpbb": "~3.2"
+        }
+    }
+}

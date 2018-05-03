@@ -1,0 +1,22 @@
+services:
+  auth.provider.ostiary:
+    class: hackthissite\ostiary\auth\provider\janus
+    arguments:
+      - '@dbal.conn'
+      - '@config'
+      - '@request'
+      - '@user'
+      - '%core.root_path%'
+      - '%core.php_ext%'
+    tags:
+          - { name: auth.provider }
+          
+  hackthissite.ostiary.listener:
+      class: hackthissite\ostiary\event\listener
+      arguments:
+          - '@user'
+          - '@auth.provider.ostiary'
+          - '@request'
+          - '%core.root_path%'
+      tags:
+          - { name: event.listener }
