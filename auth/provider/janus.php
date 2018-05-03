@@ -286,17 +286,24 @@ class janus extends \phpbb\auth\provider\base
   public function validate_session($user)
   {
     //return true;
+    
+    
     $username = $this->request->variable('htssso', '', true,\phpbb\request\request_interface::COOKIE);
     if (!empty($username)) {
       // do whatever check we were gonna do to see if its legit
       return true;
+    } else {
+    
     }
     
     // user is not set. A valid session is now determined by the user type (anonymous/bot or not)
     if ($user['user_type'] == USER_IGNORE)
     {
+      
       return true;
     }
+    
+    $this->user->reset_login_keys(false);
     return false;
   }
 }

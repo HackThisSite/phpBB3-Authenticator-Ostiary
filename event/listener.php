@@ -67,7 +67,7 @@ class listener implements EventSubscriberInterface
         $this->user->session_create($row['user_id'], false, true, true);
         redirect($phpbb_root_path); 
       } else {
-        // redirect to our new login page
+        redirect("https://google.com", false, true);
       }
     }
 	}
