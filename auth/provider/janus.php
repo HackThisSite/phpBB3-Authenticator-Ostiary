@@ -6,6 +6,8 @@
 
 namespace hackthissite\ostiary\auth\provider;
 
+require_once(__DIR__ . '/../../vendor/autoload.php');
+
 /**
  * Database authentication provider for phpBB3
  * This is for authentication via the integrated user table
@@ -20,6 +22,15 @@ class janus extends \phpbb\auth\provider\base
   */
   public function init()
   {
+    try {
+      $test = new \Ostiary\Client(array(
+        'driver' => 'redis',
+        'redis' => $this->config['ostiary_redis_server'],
+        'id' => $this->config['ostiary_client_id'],
+      ));
+    } catch (Exception $ex) {
+      return $ex->getMessage();
+    }
     return false;
   }
 	/**
@@ -40,6 +51,35 @@ class janus extends \phpbb\auth\provider\base
 		$this->user = $user;
 		$this->phpbb_root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;
+	}
+  
+  /**
+   * {@inheritdoc}
+   */
+   
+  public function acp()
+  {
+    // These are fields required in the config table
+    return array(
+      'ostiary_redis_server', 'ostiary_client_id', 'ostiary_cookie_name',
+    );
+  }
+  
+  /**
+	 * {@inheritdoc}
+	 */
+   
+	public function get_acp_template($new_config)
+	{
+    $this->user->add_lang_ext('hackthissite/ostiary', 'acp/board');
+		return array(
+			'TEMPLATE_FILE'	=> '@hackthissite_ostiary/auth_provider_ostiary.html',
+			'TEMPLATE_VARS'	=> array(
+				'AUTH_OSTIARY_CLIENT_ID'		=> $new_config['ostiary_client_id'],
+				'AUTH_OSTIARY_REDIS_SERVER'		=> $new_config['ostiary_redis_server'],
+        'AUTH_OSTIARY_COOKIE_NAME'		=> $new_config['ostiary_cookie_name'],
+			),
+		);
 	}
 
 	/**
