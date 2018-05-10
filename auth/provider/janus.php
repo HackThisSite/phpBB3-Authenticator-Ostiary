@@ -262,8 +262,7 @@ class janus extends \phpbb\auth\provider\base
       }
       
       $bucket_global = $session->getBucket('global');
-      //$bucket_global['email'] = 'bar@foo.com';
-      $username = $bucket_global['username'];
+      $username = $bucket_global['usrn'];
       file_put_contents('dump.log', 'fetched username: '.$username."\r\n", FILE_APPEND | LOCK_EX);
       
       $username_clean = utf8_clean_string($username);
@@ -364,7 +363,7 @@ class janus extends \phpbb\auth\provider\base
       $session = $ostiary->getSession($ssoid);
       if ($session != NULL) {
         $bucket_global = $session->getBucket('global');
-        $username = $bucket_global['username'];
+        $username = $bucket_global['usrn'];
         if ($username === $user['username'])
         {
           return true;
