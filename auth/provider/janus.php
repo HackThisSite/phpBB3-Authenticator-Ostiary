@@ -245,7 +245,6 @@ class janus extends \phpbb\auth\provider\base
   public function autologin() {
     // gotta use fancy phpbb methods to aquire cookies, otherwise it'll fuck shit up
     $ssoid = $this->request->variable($this->config['ostiary_cookie_name'], '', true,\phpbb\request\request_interface::COOKIE);
-    file_put_contents('dump.log', 'sso session: '.$ssoid."\r\n", FILE_APPEND | LOCK_EX);
     if (empty($ssoid)) {
       // fail! no auto login possible
       
@@ -262,14 +261,12 @@ class janus extends \phpbb\auth\provider\base
       ));
       $session = $ostiary->getSession($ssoid);
       if ($session == NULL) {
-        file_put_contents('dump.log', 'ERR: session returned null'."\r\n", FILE_APPEND | LOCK_EX);
         return array();
       }
       
       $bucket_global = $session->getBucket('global');
       $username = $bucket_global['usrn'];
       $email = $bucket_global['emla'];
-      file_put_contents('dump.log', 'fetched username: '.$username."\r\n", FILE_APPEND | LOCK_EX);
       
       $username_clean = utf8_clean_string($username);
       $sql = 'SELECT *
@@ -339,7 +336,6 @@ class janus extends \phpbb\auth\provider\base
   			}
       }
     } catch (Exception $ex) {
-      file_put_contents('dump.log', 'FAIL: '.$ex->getMessage()."\r\n", FILE_APPEND | LOCK_EX);
       return array();
     }
     
@@ -356,38 +352,36 @@ class janus extends \phpbb\auth\provider\base
     $ssoid = $this->request->variable($this->config['ostiary_cookie_name'], '', true,\phpbb\request\request_interface::COOKIE);
     
     if (empty($ssoid)) {
-      file_put_contents('dump.log', 'sso session not valid: '."\r\n", FILE_APPEND | LOCK_EX);
-      $this->user->reset_login_keys(false);
-      return false;
+      // user has no SSO stuff but don't invalidate the session yet
+      // the user could have a non logged in session which we wouldn't want to invalidate
+      //$this->user->reset_login_keys(false); 
+      //return false;
+    } else {
+      try {
+        $ostiary = new \Ostiary\Client(array(
+          'driver' => 'redis',
+          'redis' => $this->config['ostiary_redis_server'],
+          'id' => $this->config['ostiary_client_id'],
+        ));
+        $session = $ostiary->getSession($ssoid);
+        if ($session != NULL) {
+          $bucket_global = $session->getBucket('global');
+          $username = $bucket_global['usrn'];
+          if ($username === $user['username'])
+          {
+            return true;
+          } // else, invalidate the SSO? or not cuz they may be browsing without wanting to be logged in on forums  
+        } 
+      } catch (Exception $ex) {
+        //return array();
+      }
     }
-    
-    try {
-      $ostiary = new \Ostiary\Client(array(
-        'driver' => 'redis',
-        'redis' => $this->config['ostiary_redis_server'],
-        'id' => $this->config['ostiary_client_id'],
-      ));
-      $session = $ostiary->getSession($ssoid);
-      if ($session != NULL) {
-        $bucket_global = $session->getBucket('global');
-        $username = $bucket_global['usrn'];
-        if ($username === $user['username'])
-        {
-          return true;
-          file_put_contents('dump.log', 'username matches: '."\r\n", FILE_APPEND | LOCK_EX);
-        } // else, invalidate the SSO? or not cuz they may be browsing without wanting to be logged in on forums  
-      } 
-    } catch (Exception $ex) {
-      //return array();
-    }
-    
     //not logged in on SSO AND forum, could still be legit session if its an anon user or bot
     
     
     // user is not set. A valid session is now determined by the user type (anonymous/bot or not)
     if ($user['user_type'] == USER_IGNORE)
     {
-      file_put_contents('dump.log', 'user is a bot or something: '."\r\n", FILE_APPEND | LOCK_EX);
       return true;
     }
     
