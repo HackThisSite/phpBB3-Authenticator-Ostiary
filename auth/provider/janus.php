@@ -263,6 +263,7 @@ class janus extends \phpbb\auth\provider\base
       
       $bucket_global = $session->getBucket('global');
       $username = $bucket_global['usrn'];
+      $email = $bucket_global['emla'];
       file_put_contents('dump.log', 'fetched username: '.$username."\r\n", FILE_APPEND | LOCK_EX);
       
       $username_clean = utf8_clean_string($username);
@@ -305,7 +306,7 @@ class janus extends \phpbb\auth\provider\base
         $user_row = array(
   				'username'		=> $username,
   				'user_password'	=> '',
-  				'user_email'	=> 'poop@poop.com',
+  				'user_email'	=> $email,
   				'group_id'		=> (int) $row['group_id'],
   				'user_type'		=> USER_NORMAL,
   				'user_ip'		=> $this->user->ip,
