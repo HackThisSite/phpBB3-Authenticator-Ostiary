@@ -239,84 +239,103 @@ class janus extends \phpbb\auth\provider\base
     */
   public function autologin() {
     // gotta use fancy phpbb methods to aquire cookies, otherwise it'll fuck shit up
-    $username = $this->request->variable('htssso', '', true,\phpbb\request\request_interface::COOKIE);
+    $ssoid = $this->request->variable($this->config['ostiary_cookie_name'], '', true,\phpbb\request\request_interface::COOKIE);
     
-    if ($username != 0) {
+    if (empty($ssoid)) {
       // fail! no auto login possible
       return array();
     }
     
     
     // TODO: fetch proper username and other details from remote server
-    
-    
-    $username_clean = utf8_clean_string($username);
-    $sql = 'SELECT *
-        FROM ' . USERS_TABLE . "
-        WHERE username_clean = '" . $this->db->sql_escape($username_clean) . "'";
-    $result = $this->db->sql_query($sql);
-    $row = $this->db->sql_fetchrow($result);
-    $this->db->sql_freeresult($result);
-    
-    
-    // TODO: optionally add checks to see if user has a bunch of failed login attempts? then again thats the remote servers problem
-    
-    if ($row) {
-      if ($row['user_type'] == USER_INACTIVE || $row['user_type'] == USER_IGNORE)
-			{
-        
-				return array(); //ignored or inactive users can't login
-			} else {
-        
-        //$this->user->session_create($row['user_id'], false, true, true);
-        $this->user->set_login_key($row['user_id'], false, false);
-        return $row;
+    try {
+      $test = new \Ostiary\Client(array(
+        'driver' => 'redis',
+        'redis' => $this->config['ostiary_redis_server'],
+        'id' => $this->config['ostiary_client_id'],
+      ));
+      $session = $ostiary->getSession($ssoid);
+      if ($session == NULL) {
+        return array();
       }
-    } else {
-      // user was not found in local DB, it must be new
-      // retrieve default group id
-			$sql = 'SELECT group_id
-				FROM ' . GROUPS_TABLE . "
-				WHERE group_name = '" . $this->db->sql_escape('REGISTERED') . "'
-					AND group_type = " . GROUP_SPECIAL;
-			$result = $this->db->sql_query($sql);
-			$row = $this->db->sql_fetchrow($result);
-			$this->db->sql_freeresult($result);
-			if (!$row)
-			{
-				trigger_error('NO_GROUP');
-			}
       
-      $user_row = array(
-				'username'		=> $username,
-				'user_password'	=> '',
-				'user_email'	=> 'poop@poop.com',
-				'group_id'		=> (int) $row['group_id'],
-				'user_type'		=> USER_NORMAL,
-				'user_ip'		=> $this->user->ip,
-				'user_new'		=> ($this->config['new_member_post_limit']) ? 1 : 0,
-			);
+      $bucket_global = $session->getBucket('global');
+      //$bucket_global['email'] = 'bar@foo.com';
+      $username = $bucket_global['username'];
       
-      if (!function_exists('user_add'))
-			{
-				include($this->phpbb_root_path . 'includes/functions_user.' . $this->php_ext);
-			}
-			// create the user if he does not exist yet
-			user_add($user_row);
       
+      $username_clean = utf8_clean_string($username);
       $sql = 'SELECT *
-				FROM ' . USERS_TABLE . "
-				WHERE username_clean = '" . $this->db->sql_escape(utf8_clean_string($php_auth_user)) . "'";
-			$result = $this->db->sql_query($sql);
-			$row = $this->db->sql_fetchrow($result);
-			$this->db->sql_freeresult($result);
-			if ($row)
-			{
-        //$this->user->session_create($row['user_id'], false, true, true);
-        $this->user->set_login_key($row['user_id'], false, false);
-				return $row;
-			}
+          FROM ' . USERS_TABLE . "
+          WHERE username_clean = '" . $this->db->sql_escape($username_clean) . "'";
+      $result = $this->db->sql_query($sql);
+      $row = $this->db->sql_fetchrow($result);
+      $this->db->sql_freeresult($result);
+      
+      
+      // TODO: optionally add checks to see if user has a bunch of failed login attempts? then again thats the remote servers problem
+      
+      if ($row) {
+        if ($row['user_type'] == USER_INACTIVE || $row['user_type'] == USER_IGNORE)
+  			{
+          
+  				return array(); //ignored or inactive users can't login
+  			} else {
+          
+          //$this->user->session_create($row['user_id'], false, true, true);
+          $this->user->set_login_key($row['user_id'], false, false);
+          return $row;
+        }
+      } else {
+        // user was not found in local DB, it must be new
+        // retrieve default group id
+  			$sql = 'SELECT group_id
+  				FROM ' . GROUPS_TABLE . "
+  				WHERE group_name = '" . $this->db->sql_escape('REGISTERED') . "'
+  					AND group_type = " . GROUP_SPECIAL;
+  			$result = $this->db->sql_query($sql);
+  			$row = $this->db->sql_fetchrow($result);
+  			$this->db->sql_freeresult($result);
+  			if (!$row)
+  			{
+  				trigger_error('NO_GROUP');
+  			}
+        
+        $user_row = array(
+  				'username'		=> $username,
+  				'user_password'	=> '',
+  				'user_email'	=> 'poop@poop.com',
+  				'group_id'		=> (int) $row['group_id'],
+  				'user_type'		=> USER_NORMAL,
+  				'user_ip'		=> $this->user->ip,
+  				'user_new'		=> ($this->config['new_member_post_limit']) ? 1 : 0,
+  			);
+        
+        if (!function_exists('user_add'))
+  			{
+  				include($this->phpbb_root_path . 'includes/functions_user.' . $this->php_ext);
+  			}
+  			// create the user if he does not exist yet
+  			user_add($user_row);
+        
+        $sql = 'SELECT *
+  				FROM ' . USERS_TABLE . "
+  				WHERE username_clean = '" . $this->db->sql_escape(utf8_clean_string($php_auth_user)) . "'";
+  			$result = $this->db->sql_query($sql);
+  			$row = $this->db->sql_fetchrow($result);
+  			$this->db->sql_freeresult($result);
+  			if ($row)
+  			{
+          //$this->user->session_create($row['user_id'], false, true, true);
+          $this->user->set_login_key($row['user_id'], false, false);
+  				return $row;
+  			}
+      }
+    } catch (Exception $ex) {
+      return array();
     }
+    
+    
     return array();
   }
   
@@ -326,15 +345,31 @@ class janus extends \phpbb\auth\provider\base
   public function validate_session($user)
   {
     //return true;
+    $ssoid = $this->request->variable($this->config['ostiary_cookie_name'], '', true,\phpbb\request\request_interface::COOKIE);
     
-    
-    $username = $this->request->variable('htssso', '', true,\phpbb\request\request_interface::COOKIE);
-    if (!empty($username)) {
-      // do whatever check we were gonna do to see if its legit
-      return true;
-    } else {
-    
+    if (empty($ssoid)) {
+      // fail! no auto login possible
+      return array();
     }
+    
+    
+    // TODO: fetch proper username and other details from remote server
+    try {
+      $test = new \Ostiary\Client(array(
+        'driver' => 'redis',
+        'redis' => $this->config['ostiary_redis_server'],
+        'id' => $this->config['ostiary_client_id'],
+      ));
+      $session = $ostiary->getSession($ssoid);
+      if ($session != NULL) {
+        // TODO: check that this valid session actually matches the current user
+        return true;
+      }
+    } catch (Exception $ex) {
+      //return array();
+    }
+    //not logged in on SSO, could still be legit session if its an anon user or bot
+    
     
     // user is not set. A valid session is now determined by the user type (anonymous/bot or not)
     if ($user['user_type'] == USER_IGNORE)
