@@ -17,6 +17,10 @@ class janus extends \phpbb\auth\provider\base
   /** @var \phpbb\db\driver\driver_interface $db */
   protected $db;
 
+
+  /** @param	\phpbb\config\config 		$config */
+  public $config;
+  
   /**
   * {@inheritdoc}
   */
@@ -61,7 +65,7 @@ class janus extends \phpbb\auth\provider\base
   {
     // These are fields required in the config table
     return array(
-      'ostiary_redis_server', 'ostiary_client_id', 'ostiary_cookie_name',
+      'ostiary_redis_server', 'ostiary_client_id', 'ostiary_cookie_name', 'ostiary_login_url',
     );
   }
   
@@ -78,6 +82,7 @@ class janus extends \phpbb\auth\provider\base
 				'AUTH_OSTIARY_CLIENT_ID'		=> $new_config['ostiary_client_id'],
 				'AUTH_OSTIARY_REDIS_SERVER'		=> $new_config['ostiary_redis_server'],
         'AUTH_OSTIARY_COOKIE_NAME'		=> $new_config['ostiary_cookie_name'],
+        'AUTH_OSTIARY_LOGIN_URL'		=> $new_config['ostiary_login_url'],
 			),
 		);
 	}
