@@ -68,8 +68,8 @@ class listener implements EventSubscriberInterface
         redirect($phpbb_root_path); 
       } else {
       
-        file_put_contents('dump.log', 'FAIL: '.$ostiary->config['ostiary_login_url']."\r\n", FILE_APPEND | LOCK_EX);
-        redirect($ostiary->config['ostiary_login_url'], false, true);
+        file_put_contents('dump.log', 'FAIL: '.$this->ostiary->config['ostiary_login_url']."\r\n", FILE_APPEND | LOCK_EX);
+        redirect($this->ostiary->config['ostiary_login_url'], false, true);
       }
     }
 	}
