@@ -249,7 +249,7 @@ class janus extends \phpbb\auth\provider\base
     
     // TODO: fetch proper username and other details from remote server
     try {
-      $test = new \Ostiary\Client(array(
+      $ostiary = new \Ostiary\Client(array(
         'driver' => 'redis',
         'redis' => $this->config['ostiary_redis_server'],
         'id' => $this->config['ostiary_client_id'],
@@ -355,7 +355,7 @@ class janus extends \phpbb\auth\provider\base
     
     // TODO: fetch proper username and other details from remote server
     try {
-      $test = new \Ostiary\Client(array(
+      $ostiary = new \Ostiary\Client(array(
         'driver' => 'redis',
         'redis' => $this->config['ostiary_redis_server'],
         'id' => $this->config['ostiary_client_id'],
