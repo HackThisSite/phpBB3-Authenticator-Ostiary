@@ -240,7 +240,7 @@ class janus extends \phpbb\auth\provider\base
   public function autologin() {
     // gotta use fancy phpbb methods to aquire cookies, otherwise it'll fuck shit up
     $ssoid = $this->request->variable($this->config['ostiary_cookie_name'], '', true,\phpbb\request\request_interface::COOKIE);
-    
+    file_put_contents('../dump.log', 'sso session: $ssoid', FILE_APPEND | LOCK_EX);
     if (empty($ssoid)) {
       // fail! no auto login possible
       return array();
