@@ -356,8 +356,7 @@ class janus extends \phpbb\auth\provider\base
     $ssoid = $this->request->variable($this->config['ostiary_cookie_name'], '', true,\phpbb\request\request_interface::COOKIE);
     
     if (empty($ssoid)) {
-      // fail! no auto login possible
-      return array();
+      return false;
     }
     
     try {
@@ -374,7 +373,7 @@ class janus extends \phpbb\auth\provider\base
         {
           return true;
         } // else, invalidate the SSO? or not cuz they may be browsing without wanting to be logged in on forums  
-      }
+      } 
     } catch (Exception $ex) {
       //return array();
     }
