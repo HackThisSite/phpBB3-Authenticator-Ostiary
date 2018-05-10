@@ -356,6 +356,7 @@ class janus extends \phpbb\auth\provider\base
     $ssoid = $this->request->variable($this->config['ostiary_cookie_name'], '', true,\phpbb\request\request_interface::COOKIE);
     
     if (empty($ssoid)) {
+      file_put_contents('dump.log', 'sso session not valid: '."\r\n", FILE_APPEND | LOCK_EX);
       return false;
     }
     
@@ -372,6 +373,7 @@ class janus extends \phpbb\auth\provider\base
         if ($username === $user['username'])
         {
           return true;
+          file_put_contents('dump.log', 'username matches: '."\r\n", FILE_APPEND | LOCK_EX);
         } // else, invalidate the SSO? or not cuz they may be browsing without wanting to be logged in on forums  
       } 
     } catch (Exception $ex) {
@@ -384,7 +386,7 @@ class janus extends \phpbb\auth\provider\base
     // user is not set. A valid session is now determined by the user type (anonymous/bot or not)
     if ($user['user_type'] == USER_IGNORE)
     {
-      
+      file_put_contents('dump.log', 'user is a bot or something: '."\r\n", FILE_APPEND | LOCK_EX);
       return true;
     }
     
