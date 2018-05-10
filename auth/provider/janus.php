@@ -357,6 +357,7 @@ class janus extends \phpbb\auth\provider\base
     
     if (empty($ssoid)) {
       file_put_contents('dump.log', 'sso session not valid: '."\r\n", FILE_APPEND | LOCK_EX);
+      $this->user->reset_login_keys(false);
       return false;
     }
     
