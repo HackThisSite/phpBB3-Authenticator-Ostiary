@@ -352,8 +352,6 @@ class janus extends \phpbb\auth\provider\base
       return array();
     }
     
-    
-    // TODO: fetch proper username and other details from remote server
     try {
       $ostiary = new \Ostiary\Client(array(
         'driver' => 'redis',
@@ -362,13 +360,18 @@ class janus extends \phpbb\auth\provider\base
       ));
       $session = $ostiary->getSession($ssoid);
       if ($session != NULL) {
-        // TODO: check that this valid session actually matches the current user
-        return true;
+        $bucket_global = $session->getBucket('global');
+        $username = $bucket_global['username'];
+        if ($username === $user['username'])
+        {
+          return true;
+        } // else, invalidate the SSO? or not cuz they may be browsing without wanting to be logged in on forums  
       }
     } catch (Exception $ex) {
       //return array();
     }
-    //not logged in on SSO, could still be legit session if its an anon user or bot
+    
+    //not logged in on SSO AND forum, could still be legit session if its an anon user or bot
     
     
     // user is not set. A valid session is now determined by the user type (anonymous/bot or not)
