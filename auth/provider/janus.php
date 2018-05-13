@@ -367,7 +367,7 @@ class janus extends \phpbb\auth\provider\base
         if ($session != NULL) {
           $ostuser = $session->getUser();
           $username = utf8_clean_string($ostuser->getUsername());
-          if ($username === $this->user['username'])
+          if ($username === $user['username_clean']) // note that this $user isn't the same as our $this->user, its more like $this->user->data
           {
             return true;
           } // else, invalidate the SSO? or not cuz they may be browsing without wanting to be logged in on forums  
