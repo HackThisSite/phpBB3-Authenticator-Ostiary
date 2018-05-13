@@ -138,7 +138,7 @@ class janus extends \phpbb\auth\provider\base
   			);
       }
       $user = $session->getUser();
-      $username_ost = $user->getDisplayName();
+      $username_ost = $user->getUsername();
       $email = $user->getEmail();
       $username_clean = utf8_clean_string($username);
       
@@ -265,7 +265,7 @@ class janus extends \phpbb\auth\provider\base
         return array();
       }
       $user = $session->getUser();
-      $username = $user->getDisplayName();
+      $username = $user->getUsername();
       $email = $user->getEmail();
       
       $username_clean = utf8_clean_string($username);
@@ -366,7 +366,7 @@ class janus extends \phpbb\auth\provider\base
         $session = $ostiary->getSession($ssoid);
         if ($session != NULL) {
           $user = $session->getUser();
-          $username = utf8_clean_string($user->getDisplayName());
+          $username = utf8_clean_string($user->getUsername());
           if ($username === $user['username'])
           {
             return true;
